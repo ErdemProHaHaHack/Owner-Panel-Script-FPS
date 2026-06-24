@@ -1,4 +1,4 @@
--- [[ ULTRA OP DEV PANEL - BÖLÜM 1 ]] --
+-- [[ ULTRA OP DEV PANEL - PART 1 ]] --
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Player = game.Players.LocalPlayer
@@ -6,26 +6,63 @@ local Camera = game.Workspace.CurrentCamera
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
--- Geliştirilmiş Ayarlar Tablosu
+-- Settings Table
 local Settings = {
     CamlockEnabled = false,
     TargetBots = true,
     CheckVisibility = true,
-    
-    SpeedEnabled = false, -- Aç/Kapa
+    SpeedEnabled = false,
     WalkSpeed = 16,
-    
-    JumpEnabled = false, -- Aç/Kapa
+    JumpEnabled = false,
     JumpPower = 50,
-    
     InfiniteJump = false,
     FlyEnabled = false,
     FlySpeed = 50
 }
 
+-- [[ MOBILE SHORTCUT MENU ]] --
+local ShortcutGui = Instance.new("ScreenGui", Player.PlayerGui)
+ShortcutGui.Name = "MobileShortcuts"
+ShortcutGui.ResetOnSpawn = false
+
+local ShortcutFrame = Instance.new("Frame", ShortcutGui)
+ShortcutFrame.Size = UDim2.new(0, 120, 0, 300)
+ShortcutFrame.Position = UDim2.new(0, 10, 0.3, 0)
+ShortcutFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+ShortcutFrame.BackgroundTransparency = 0.5
+ShortcutFrame.Active = true
+ShortcutFrame.Draggable = true
+
+local ShortList = Instance.new("UIListLayout", ShortcutFrame)
+ShortList.Padding = UDim.new(0, 5)
+ShortList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+
+local function createShortBtn(name, settingKey)
+    local btn = Instance.new("TextButton", ShortcutFrame)
+    btn.Size = UDim2.new(0, 100, 0, 30)
+    btn.Text = name
+    btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    btn.TextColor3 = Color3.new(1, 1, 1)
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 12
+    
+    btn.MouseButton1Click:Connect(function()
+        Settings[settingKey] = not Settings[settingKey]
+        btn.BackgroundColor3 = Settings[settingKey] and Color3.fromRGB(0, 170, 127) or Color3.fromRGB(40, 40, 40)
+    end)
+end
+
+-- Create Shortcuts for Mobile
+createShortBtn("Camlock", "CamlockEnabled")
+createShortBtn("Speed", "SpeedEnabled")
+createShortBtn("Jump", "JumpEnabled")
+createShortBtn("Inf Jump", "InfiniteJump")
+createShortBtn("Fly", "FlyEnabled")
+
+-- [[ RAYFIELD UI ]] --
 local Window = Rayfield:CreateWindow({
     Name = "🚀 FPS DEV PANEL | Extreme Edition",
-    LoadingTitle = "Sistem Yükleniyor...",
+    LoadingTitle = "Loading System...",
     LoadingSubtitle = "by AI Assistant",
     ConfigurationSaving = {Enabled = true, FolderName = "DevPanelConfig", FileName = "Settings"},
     KeySystem = false
@@ -34,38 +71,42 @@ local Window = Rayfield:CreateWindow({
 local MainTab = Window:CreateTab("🎯 Combat", 4483362458) 
 local PlayerTab = Window:CreateTab("🏃 Movement", 4483362458)
 
--- [[ COMBAT SEKMESİ ]] --
+-- Combat Tab
+MainTab:CreateSection("Aimbot Settings")
 MainTab:CreateToggle({
-    Name = "Camlock (360° / Canlılar)",
+    Name = "Camlock (360° / Alive Only)",
     CurrentValue = false,
     Flag = "CamlockToggle", 
     Callback = function(Value) Settings.CamlockEnabled = Value end,
 })
 
+MainTab:CreateSection("Target Filters")
 MainTab:CreateToggle({
-    Name = "Botları Hedefle",
+    Name = "Target Bots/NPCs",
     CurrentValue = true,
     Flag = "BotToggle", 
     Callback = function(Value) Settings.TargetBots = Value end,
 })
 
 MainTab:CreateToggle({
-    Name = "Sadece Görünürleri Hedefle",
+    Name = "Visibility Check",
     CurrentValue = true,
     Flag = "VisToggle", 
     Callback = function(Value) Settings.CheckVisibility = Value end,
 })
+-- [[ ULTRA OP DEV PANEL - PART 2 ]] --
 
--- [[ MOVEMENT SEKMESİ ]] --
+-- Movement Tab
+PlayerTab:CreateSection("Speed Settings")
 PlayerTab:CreateToggle({
-    Name = "Hız Hack Aktif",
+    Name = "Enable Speed Hack",
     CurrentValue = false,
     Flag = "SpeedToggle", 
     Callback = function(Value) Settings.SpeedEnabled = Value end,
 })
 
 PlayerTab:CreateSlider({
-    Name = "Yürüme Hızı",
+    Name = "WalkSpeed Value",
     Range = {16, 500},
     Increment = 1,
     Suffix = "Speed",
@@ -74,15 +115,16 @@ PlayerTab:CreateSlider({
     Callback = function(Value) Settings.WalkSpeed = Value end,
 })
 
+PlayerTab:CreateSection("Jump Settings")
 PlayerTab:CreateToggle({
-    Name = "Zıplama Hack Aktif",
+    Name = "Enable Jump Hack",
     CurrentValue = false,
     Flag = "JumpToggle", 
     Callback = function(Value) Settings.JumpEnabled = Value end,
 })
 
 PlayerTab:CreateSlider({
-    Name = "Zıplama Gücü",
+    Name = "JumpPower Value",
     Range = {50, 1000},
     Increment = 1,
     Suffix = "Power",
@@ -90,25 +132,24 @@ PlayerTab:CreateSlider({
     Flag = "JumpSlider", 
     Callback = function(Value) Settings.JumpPower = Value end,
 })
--- [[ ULTRA OP DEV PANEL - BÖLÜM 2 ]] --
 
--- Fly ve Diğer Ayarların Devamı
+PlayerTab:CreateSection("Special Movement")
 PlayerTab:CreateToggle({
-    Name = "Sonsuz Zıplama",
+    Name = "Infinite Jump",
     CurrentValue = false,
     Flag = "InfJumpToggle", 
     Callback = function(Value) Settings.InfiniteJump = Value end,
 })
 
 PlayerTab:CreateToggle({
-    Name = "Fly (Uçma Modu)",
+    Name = "Fly Mode",
     CurrentValue = false,
     Flag = "FlyToggle", 
     Callback = function(Value) Settings.FlyEnabled = Value end,
 })
 
 PlayerTab:CreateSlider({
-    Name = "Uçuş Hızı",
+    Name = "Fly Speed",
     Range = {10, 300},
     Increment = 1,
     Suffix = "Speed",
@@ -117,7 +158,7 @@ PlayerTab:CreateSlider({
     Callback = function(Value) Settings.FlySpeed = Value end,
 })
 
--- [[ MANTIK VE SİSTEMLER ]] --
+-- [[ CORE LOGIC ]] --
 
 local function isVisible(targetPart)
     if not Settings.CheckVisibility then return true end
@@ -134,12 +175,9 @@ local function getClosestTarget()
     local closestTarget = nil
     local shortestDistance = math.huge
     for _, obj in pairs(game.Workspace:GetDescendants()) do
-        -- ÖNEMLİ: Sadece canı 0'dan büyük olanları (Yaşayanları) hedefle
         if obj:IsA("Humanoid") and obj.Health > 0 and obj.Parent:FindFirstChild("Head") and obj.Parent ~= Player.Character then
             local targetHead = obj.Parent.Head
-            if not Settings.TargetBots and not game.Players:GetPlayerFromCharacter(obj.Parent) then
-                continue
-            end
+            if not Settings.TargetBots and not game.Players:GetPlayerFromCharacter(obj.Parent) then continue end
             local distance = (targetHead.Position - Camera.CFrame.Position).Magnitude
             if distance < shortestDistance then
                 if isVisible(targetHead) then
@@ -152,7 +190,6 @@ local function getClosestTarget()
     return closestTarget
 end
 
--- Fly Sistemi İçin Gerekli Nesneler
 local bv, bg
 RunService.RenderStepped:Connect(function()
     local char = Player.Character
@@ -166,13 +203,13 @@ RunService.RenderStepped:Connect(function()
         if target then Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Position) end
     end
 
-    -- Speed & Jump (Toggle Kontrolü)
+    -- Speed & Jump
     if hum then
         hum.WalkSpeed = Settings.SpeedEnabled and Settings.WalkSpeed or 16
         hum.JumpPower = Settings.JumpEnabled and Settings.JumpPower or 50
     end
 
-    -- Fly Mantığı (Mobil Uyumluluk)
+    -- FIXED FLY SYSTEM
     if Settings.FlyEnabled then
         if not bv then
             bv = Instance.new("BodyVelocity", root)
@@ -180,20 +217,20 @@ RunService.RenderStepped:Connect(function()
             bg = Instance.new("BodyGyro", root)
             bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
         end
-        -- Kamera baktığı yöne doğru uçurur
+        if hum then hum.PlatformStand = true end -- This prevents the fly from stopping
         bv.Velocity = Camera.CFrame.LookVector * Settings.FlySpeed
         bg.CFrame = Camera.CFrame
     else
         if bv then bv:Destroy() bv = nil end
         if bg then bg:Destroy() bg = nil end
+        if hum then hum.PlatformStand = false end
     end
 end)
 
--- Sonsuz Zıplama
 UserInputService.JumpRequest:Connect(function()
     if Settings.InfiniteJump and Player.Character and Player.Character:FindFirstChildOfClass("Humanoid") then
         Player.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
     end
 end)
 
-Rayfield:Notify({Title = "Sistem Güncellendi!", Content = "Fly ve Can Kontrolü eklendi.", Duration = 5})
+Rayfield:Notify({Title = "System Ready!", Content = "Fly fixed and Mobile Shortcuts added!", Duration = 5})
