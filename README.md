@@ -1,2 +1,1 @@
-# Owner-Panel-Script-FPS
-FPS script
+DON'T STEAL
