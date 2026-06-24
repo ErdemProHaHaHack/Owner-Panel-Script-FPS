@@ -1,0 +1,175 @@
+-- [[ ULTRA OP DEV PANEL - BÖLÜM 1 ]] --
+-- LÜTFEN BU KODUN ALTINA 2. BÖLÜMÜ EKLEYİNİZ
+
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+-- Local Değişkenler
+local Player = game.Players.LocalPlayer
+local Camera = game.Workspace.CurrentCamera
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+-- Ayarlar Tablosu
+local Settings = {
+    CamlockEnabled = false,
+    TargetBots = true,
+    CheckVisibility = true,
+    WalkSpeed = 16,
+    JumpPower = 50,
+    InfiniteJump = false
+}
+
+-- [[ UI OLUŞTURMA ]] --
+local Window = Rayfield:CreateWindow({
+    Name = "🚀 FPS DEV PANEL | Ultra Edition",
+    LoadingTitle = "Sistem Yükleniyor...",
+    LoadingSubtitle = "by AI Assistant",
+    ConfigurationSaving = {
+        Enabled = true,
+        FolderName = "DevPanelConfig", 
+        FileName = "Settings"
+    },
+    Discord = {
+        Enabled = false,
+        Invite = "",
+        RememberJoins = true
+    },
+    KeySystem = false
+})
+
+-- Tablar (Sekmeler)
+local MainTab = Window:CreateTab("🎯 Combat", 4483362458) 
+local PlayerTab = Window:CreateTab("🏃 Player", 4483362458)
+
+-- [[ COMBAT SEKMESİ ]] --
+MainTab:CreateToggle({
+    Name = "Camlock (360 Derece)",
+    CurrentValue = false,
+    Flag = "CamlockToggle", 
+    Callback = function(Value)
+        Settings.CamlockEnabled = Value
+    end,
+})
+
+MainTab:CreateToggle({
+    Name = "Botları Hedefle",
+    CurrentValue = true,
+    Flag = "BotToggle", 
+    Callback = function(Value)
+        Settings.TargetBots = Value
+    end,
+})
+
+MainTab:CreateToggle({
+    Name = "Sadece Görünürleri Hedefle",
+    CurrentValue = true,
+    Flag = "VisToggle", 
+    Callback = function(Value)
+        Settings.CheckVisibility = Value
+    end,
+})
+-- [[ ULTRA OP DEV PANEL - BÖLÜM 2 ]] --
+
+-- [[ PLAYER SEKMESİ ]] --
+PlayerTab:CreateSlider({
+    Name = "Yürüme Hızı",
+    Range = {16, 300},
+    Increment = 1,
+    Suffix = "Speed",
+    CurrentValue = 16,
+    Flag = "SpeedSlider", 
+    Callback = function(Value)
+        Settings.WalkSpeed = Value
+        if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+            Player.Character.Humanoid.WalkSpeed = Value
+        end
+    end,
+})
+
+PlayerTab:CreateSlider({
+    Name = "Zıplama Gücü",
+    Range = {50, 500},
+    Increment = 1,
+    Suffix = "Power",
+    CurrentValue = 50,
+    Flag = "JumpSlider", 
+    Callback = function(Value)
+        Settings.JumpPower = Value
+        if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+            Player.Character.Humanoid.JumpPower = Value
+        end
+    end,
+})
+
+PlayerTab:CreateToggle({
+    Name = "Sonsuz Zıplama",
+    CurrentValue = false,
+    Flag = "InfJumpToggle", 
+    Callback = function(Value)
+        Settings.InfiniteJump = Value
+    end,
+})
+
+-- [[ MANTIK VE SİSTEMLER ]] --
+
+-- Görünürlük Kontrolü (Raycast)
+local function isVisible(targetPart)
+    if not Settings.CheckVisibility then return true end
+    local origin = Camera.CFrame.Position
+    local direction = (targetPart.Position - origin).Unit * (targetPart.Position - origin).Magnitude
+    local raycastParams = RaycastParams.new()
+    raycastParams.FilterDescendantsInstances = {Player.Character, targetPart.Parent}
+    raycastParams.FilterType = Enum.RaycastFilterType.Exclude
+    local result = game.Workspace:Raycast(origin, direction, raycastParams)
+    return result == nil
+end
+
+-- En Yakın Hedefi Bulma (Oyuncular + Botlar)
+local function getClosestTarget()
+    local closestTarget = nil
+    local shortestDistance = math.huge
+    for _, obj in pairs(game.Workspace:GetDescendants()) do
+        if obj:IsA("Humanoid") and obj.Parent:FindFirstChild("Head") and obj.Parent ~= Player.Character then
+            local targetHead = obj.Parent.Head
+            if not Settings.TargetBots and not game.Players:GetPlayerFromCharacter(obj.Parent) then
+                continue
+            end
+            local distance = (targetHead.Position - Camera.CFrame.Position).Magnitude
+            if distance < shortestDistance then
+                if isVisible(targetHead) then
+                    shortestDistance = distance
+                    closestTarget = targetHead
+                end
+            end
+        end
+    end
+    return closestTarget
+end
+
+-- Ana Döngü
+RunService.RenderStepped:Connect(function()
+    if Settings.CamlockEnabled then
+        local target = getClosestTarget()
+        if target then
+            Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Position)
+        end
+    end
+    if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+        Player.Character.Humanoid.WalkSpeed = Settings.WalkSpeed
+        Player.Character.Humanoid.JumpPower = Settings.JumpPower
+    end
+end)
+
+-- Sonsuz Zıplama (Mobile ve PC uyumlu)
+UserInputService.JumpRequest:Connect(function()
+    if Settings.InfiniteJump and Player.Character and Player.Character:FindFirstChildOfClass("Humanoid") then
+        Player.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
+    end
+end)
+
+Rayfield:Notify({
+    Title = "Sistem Hazır!",
+    Content = "Panel başarıyla yüklendi. İyi oyunlar!",
+    Duration = 5,
+    Image = 4483362458,
+})
